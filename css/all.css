@@ -1,0 +1,135 @@
+﻿#ho_adv{position:absolute;top:-9999px;}
+body {	background: #000;color: #999;}
+*{
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+.red a{background: #f22!important;}	
+
+a{color:#fff; cursor:pointer;}
+span.month{color:#666; font-size:80%;}
+.late{
+	color: #c44;
+	border-color: #c44;
+}
+input{
+	margin:0;
+	max-width: 100%;
+	background: #000;
+	border: 1px solid #555;
+	color:#666;
+}
+ul {
+	list-style: none;
+	padding: 3px;
+}
+.inner{
+	border: 1px solid #555;
+	padding: 3px;
+	width: 100%;
+}
+.outer{
+	padding: 3px;
+	width: 100%;
+}
+
+#wrapper{
+	float:left;
+	position:relative;
+	min-width: 474px;
+	width: 100%;
+}
+.today{
+	min-height: 50px;
+	position:relative;
+}
+.middle{
+	min-height:263px;
+	padding: 3px 0;
+	width:100%
+}
+.todo{
+	float:left;
+	min-height:263px;
+	position: relative;
+}
+.todo, .schedule{
+	width:25%;
+}
+.calendar{
+	width: 50%;
+	1min-width:308px;
+	float:left;
+	padding: 0 3px;
+}
+#calendar{
+	margin: 0 auto;
+}
+.ui-datepicker {
+	width: auto;
+	1min-width: 16em;
+}
+.schedule{
+	float:right;
+	min-height:263px;
+	position:relative;
+}
+.calendar .button{
+	float:left;
+	width: 33.3%;
+	padding: 3px 3px 0 3px;
+}
+.panel{
+	display: none;
+	position: absolute;
+	top:0;
+	left:0;
+	background: #000;
+	1height:100%;
+}
+.close, .title{
+	position: absolute;
+	top:0;
+	right:0;
+	background: #000;
+	padding: 3px;
+	width: auto;
+}
+.title{
+	left: 48px;
+	float:left;
+	right: auto;
+	top: -3px;
+	padding: 0 3px;
+	font-size:80%;
+	color: #666;
+}
+.show.inner{
+	display: inline-block;
+	text-align:center;
+}
+#page .quadr{
+    display: inline-block;
+    overflow: hidden;
+    padding: 4px 4px 0 4px;
+    text-indent: -9999px;
+	margin: 4px 0 0;
+}
+#page .del{
+	border: 1px solid #555555;
+    display: block;
+    height: 8px;
+    width: 8px;
+}
+#page .quadr.active, #page .quadr:hover{
+	background: url("dark-hive/images/ui-icons_4b8e0b_256x240.png") no-repeat scroll -63px -147px rgba(0, 0, 0, 0);
+}
+.panel .del{
+	background: url("dark-hive/images/ui-icons_222222_256x240.png") no-repeat -99px -131px;
+	text-indent: -9999px;
+	overflow: hidden;
+	width: 10px;
+	height:10px;
+	display: inline-block;
+}

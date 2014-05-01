@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>	
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />	
+	<title>Сalendar</title>	
+	<link media="screen,projection" type="text/css" rel="stylesheet" href="css/dark-hive/jquery-ui-1.10.4.custom.min.css">
+	<link media="screen,projection" type="text/css" rel="stylesheet" href="css/all.css">
+	
+	<script data-main="js/main" src="js/require.js" type="text/javascript"></script>
+</head>
+<body>
+	<div id="wrapper">		
+		<div id="page" class="outer">		
+			
+		</div>		
+	<div class="panel outer" id="panel">
+		<a class="button close inner" href="#">close</a>
+		
+		<div class="inner">
+			<div id="periodic"></div>
+			<div id="annual" ></div>
+			<div id="event" ></div>
+		</div>
+	</div>
+	</div>
+</body>
+<script type="text/template" id="main-template">
+	<div id="today" class="today inner">
+		<div class="title inner">today <%= window.innerWidth %></div>
+		<div id="today">
+			<ul>
+				<% _.each(list.today.acts, function(item, ind){ %>
+					<li <% if (item.date !== list.today.date) { %> class="late" <% }; %>>
+						<span class="quadr"><a href="#" class="del" data-ind="<%= ind %>">del</a></span>
+						<%= item.name %>
+						<% if (item.date !== list.today.date) { %>
+							<span class="month">(<%= item.date %>)</span>
+						<% }; %>
+					</li>
+				<% }); %>
+			</ul>
+		</div>
+	</div>
+	<div class="middle">
+		<div class="todo inner">
+			<div id="todo" ></div>
+		</div>
+		<div class="calendar">
+			<div id="calendar"></div>
+			<% _.each(config.modules, function(item, ind){ %>
+				<div class="button outer">
+					<a class="inner show" data-target="<%= item %>"  href="#"><%= item %></a>
+				</div>
+			<% }); %>
+		</div>	
+		<div class="schedule inner">
+			<div id="schedule">
+				<div class="title inner">tomorrow</div>
+				<ul>
+					<% _.each(list.tomorrow.acts, function(item, ind){ %>
+						<li><%= item.name %></li>
+					<% }); %>
+				</ul>
+			</div>
+		</div>	
+	</div>
+	
+</script>
+<script type="text/template" id="schedule-template">
+			<div class="title inner"><%= _date %></div>
+			<ul>
+				<% _.each(list, function(item, ind){ %>
+					<li><%= item.name %></li>
+				<% }); %>
+			</ul>	
+</script>
+
+<script type="text/template" id="todo-template">
+			<div class="title inner">todo</div>
+	<ul>
+		<% _.each(list, function(item, ind){ %>
+			<li>
+				<span class="quadr">
+					<a href="#" class="del" data-ind="<%= ind %>">del</a>
+				</span>
+				<%= item.act %>
+			</li>
+		
+		<% }); %>
+	</ul>
+	<input type="text" id="todo-name" /><a id="add-todo" href="#">add</a>
+</script>
+<script type="text/template" id="annual-template">
+	<input type="text" id="annual-name" placeholder="name" />
+	<input type="text" id="annual-date" placeholder="date" />
+	<input type="number" id="annual-year" placeholder="year" />
+	<a id="add-annual" href="#">add</a>
+	
+	<ul>
+		<% _.each(list, function(month, monthind){ %>
+			<li><span class="month"><%= monthes[monthind] %></span><ul>
+				<% _.each(month, function(day, dayind){ %>
+					<% _.each(day, function(item, ind){ %>
+						<li>
+							<%= dayind + ": " +item.name %>
+							<a href="#" class="del" data-ind="<%= monthind + "-" + dayind + "-" + ind %>">del</a>
+						</li>
+					<% }); %>	
+				<% }); %>
+			</ul></li>
+		<% }); %>
+	</ul>
+</script>
+
+
+<script type="text/template" id="event-template">
+	<input type="text" id="event-name" placeholder="name" />
+	<input type="text" id="event-date" placeholder="date" />
+	<a id="add-event" href="#">add</a>
+	
+	<ul>
+		<% _.each(list, function(month, monthind){ %>
+			<li><span class="month"><%= monthes[monthind] %></span><ul>
+				<% _.each(month, function(day, dayind){ %>
+					<% _.each(day, function(item, ind){ %>
+						<li>
+							<%=  dayind + ": " +item.name %> <span class="month">(<%= item.date %>)</span>
+							<a href="#" class="del" data-ind="<%= monthind + "-" + dayind + "-" + ind%>">del</a>
+						</li>
+					<% }); %>
+				<% }); %>
+			</ul></li>
+		<% }); %>
+	</ul>
+</script>
+
+
+<script type="text/template" id="periodic-template">
+	<input type="text" id="periodic-name" />
+	<input type="number" id="periodic-number" />
+	<select  id="periodic-unit" >
+		<option value="day">day</option>
+		<option value="week">week</option>
+		<option value="month">month</option>
+	</select>
+	<input type="text" id="periodic-date" />
+	<a id="add-periodic" href="#">add</a>
+	<ul>
+		<% _.each(list, function(item, ind){ %>
+			<li>
+				<%= item.name %> each <%= item.number %><%= item.unit %>
+				<a href="#" class="del" data-ind="<%= ind %>">del</a>
+			</li>
+		<% }); %>
+	</ul>
+</script>
+
+</html>

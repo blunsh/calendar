@@ -1,0 +1,15 @@
+{
+	"todo":[
+		{"act":"","created":""},
+		{"act":"","created":""},
+		{"act":"","created":""}
+	],
+	"periodic":[
+		{"act":"","start":"","period":""},
+		{"act":"","start":"","period":""},
+		{"act":"","start":"","period":""},
+	],
+	"schedule":{
+		
+	}
+}
