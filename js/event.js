@@ -1,5 +1,5 @@
 ﻿define('event',
-	['jquery','jqueryui', 'underscore', 'mvc', 'ModuleModel'],
+	['jquery', 'underscore','jqueryui', 'mvc', 'ModuleModel'],
 	function($,$ui, _, mvc, ModuleModel){
 	
 		//console.log('event--mvc', ModuleModel,mvc);

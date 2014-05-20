@@ -10,7 +10,7 @@
 </head>
 <body>
 	<div id="wrapper">		
-		<div id="page" class="outer">		
+		<div id="page" class="">		
 			
 		</div>		
 	<div class="panel outer" id="panel">
@@ -25,9 +25,9 @@
 	</div>
 </body>
 <script type="text/template" id="main-template">
-	<div id="today" class="today inner">
+	<div class="today box">
 		<div class="title inner">today <%= window.innerWidth %></div>
-		<div id="today">
+		<div id="today" class="inner">
 			<ul>
 				<% _.each(list.today.acts, function(item, ind){ %>
 					<li <% if (item.date !== list.today.date) { %> class="late" <% }; %>>
@@ -41,29 +41,29 @@
 			</ul>
 		</div>
 	</div>
-	<div class="middle">
-		<div class="todo inner">
-			<div id="todo" ></div>
-		</div>
-		<div class="calendar">
-			<div id="calendar"></div>
-			<% _.each(config.modules, function(item, ind){ %>
-				<div class="button outer">
-					<a class="inner show" data-target="<%= item %>"  href="#"><%= item %></a>
-				</div>
-			<% }); %>
-		</div>	
-		<div class="schedule inner">
-			<div id="schedule">
-				<div class="title inner">tomorrow</div>
-				<ul>
-					<% _.each(list.tomorrow.acts, function(item, ind){ %>
-						<li><%= item.name %></li>
-					<% }); %>
-				</ul>
-			</div>
-		</div>	
+	
+	<div class="todo  box">
+		<div id="todo" class="inner"></div>
 	</div>
+	<div class="calendar box">
+		<div id="calendar"></div>
+		<% _.each(config.modules, function(item, ind){ %>
+			<div class="button outer">
+				<a class="inner show" data-target="<%= item %>"  href="#"><%= item %></a>
+			</div>
+		<% }); %>
+	</div>	
+	<div class="schedule  box">
+		<div id="schedule" class="inner">
+			<div class="title inner">tomorrow</div>
+			<ul>
+				<% _.each(list.tomorrow.acts, function(item, ind){ %>
+					<li><%= item.name %></li>
+				<% }); %>
+			</ul>
+		</div>
+	</div>	
+	
 	
 </script>
 <script type="text/template" id="schedule-template">

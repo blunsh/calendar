@@ -16,6 +16,11 @@
 		ModuleModel: 'module-model',
 		todo: 'todo',
 		annual:'annual'
+	},
+	shim: {
+		"jqueryui": {
+			deps: ['jquery']
+		} 
 	}
 });
 

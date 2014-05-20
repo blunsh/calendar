@@ -1,4 +1,4 @@
-define(function(){
+define(['jquery'],function(){
 	
 	var mvc = (function (){
 		var mvc={};
