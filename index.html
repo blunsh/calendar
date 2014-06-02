@@ -47,11 +47,13 @@
 	</div>
 	<div class="calendar box">
 		<div id="calendar"></div>
-		<% _.each(config.modules, function(item, ind){ %>
-			<div class="button outer">
-				<a class="inner show" data-target="<%= item %>"  href="#"><%= item %></a>
-			</div>
-		<% }); %>
+		<div class="button-holder">
+			<% _.each(config.modules, function(item, ind){ %>
+				<div class="button outer">
+					<a class="inner show" data-target="<%= item %>"  href="#"><%= item %></a>
+				</div>
+			<% }); %>
+		</div>
 	</div>	
 	<div class="schedule  box">
 		<div id="schedule" class="inner">
@@ -88,7 +90,10 @@
 		
 		<% }); %>
 	</ul>
-	<input type="text" id="todo-name" /><a id="add-todo" href="#">add</a>
+	<div class="button-holder">
+		<input type="text" id="todo-name" />
+		<div><a id="add-todo" href="#">add</a></div>
+	</div>
 </script>
 <script type="text/template" id="annual-template">
 	<input type="text" id="annual-name" placeholder="name" />
