@@ -52,7 +52,7 @@ require(
 				mvc.subscribe(name + 'ModelChanged', this.updateData, this, [name]);
 			},
 			dataRecieved: function(){
-				this.todoModel.setData(this.data.todo);
+				this.todoModel.setData(this.data.todo || []);
 				
 				var n = new Date();
 				var date = this._dateToStr(n);
@@ -179,8 +179,9 @@ require(
 				this.todoView.render();
 				this.todoController.bindHandlers();
 				var _this = this;
-				var an = this.model.data.annual;
-				var ev = this.model.data.event;
+				var an = this.model.data.annual || {};
+				var ev = this.model.data.event || [];
+				
 				$(this.view.calendarHolder).datepicker({		
 					firstDay: 1,		
 					dayNamesMin: config.dayNamesMin,	
@@ -214,20 +215,20 @@ require(
 				this.annualView = new annual.view(this.model.annualModel);
 				this.annualController = new annual.controller(this.model.annualModel, this.annualView);
 				
-				this.model.annualModel.setData(this.model.data.annual);
+				this.model.annualModel.setData(this.model.data.annual || {});
 			},
 			periodicModule: function(){
 				this.model.periodicModel = new periodic.model(this.model);
 				this.periodicView = new periodic.view(this.model.periodicModel);
 				this.periodicController = new periodic.controller(this.model.periodicModel, this.periodicView);
-				this.model.periodicModel.setData(this.model.data.periodic);
+				this.model.periodicModel.setData(this.model.data.periodic || []);
 				
 			},
 			eventModule: function(){
 				this.model.eventModel = new event.model(this.model);
 				this.eventView = new event.view(this.model.eventModel);
 				this.eventController = new event.controller(this.model.eventModel, this.eventView);
-				this.model.eventModel.setData(this.model.data.event);
+				this.model.eventModel.setData(this.model.data.event || []);
 				
 			},
 			destroy: function(name){

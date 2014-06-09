@@ -223,32 +223,12 @@ ul {
 	height:10px;
 	display: inline-block;
 }
-
-
-
-
-@media (orientation: portrait) { 
-	 .box{
-		height: 50%;
-		width: 50%;
-	}
+#calendar .ui-widget{
+	font-size: 83%;
 }
-@media (min-height: 360px) { 
-	body{
-		font-size: 18px;
-	}
-	#page .del{
-		height:9px;
-		width:9px;
-	}
-	#calendar .ui-widget{
-		font-size: 16px;
-	}
-	.calendar.box, #todo{
-		padding-bottom: 32px;
-	}
-	
-}
+
+
+
 
 @media (min-height: 420px) { 
 	body{
@@ -260,9 +240,6 @@ ul {
 	}
 	#page .quadr.active, #page .quadr:hover {
 		background-position: -62px -145px;
-	}
-	#calendar .ui-widget{
-		font-size: 19px;
 	}
 	.calendar.box, #todo{
 		padding-bottom: 34px;
@@ -280,9 +257,6 @@ ul {
 	#page .quadr.active, #page .quadr:hover {
 		background-position: -62px -144px;
 	}
-	#calendar .ui-widget{
-		font-size: 21px;
-	}
 	.calendar.box, #todo{
 		padding-bottom: 40px;
 	}
@@ -299,11 +273,23 @@ ul {
 	#page .quadr.active, #page .quadr:hover {
 		background-position: -64px -141px;
 	}
-	#calendar .ui-widget{
-		font-size: 28px;
-	}
 	.calendar.box, #todo{
 		padding-bottom: 59px;
 	}
 	
+}
+
+@media (orientation: portrait) { 
+	#wrapper{
+		min-width: 330px;
+		min-height: 420px;
+	}
+	.box{
+		height: 50%;
+		width: 50%;
+	}
+
+	#calendar .ui-widget, .calendar{
+		font-size: 75%;
+	}
 }
