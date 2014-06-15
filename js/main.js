@@ -15,10 +15,17 @@
 		mvc: 'mvc',
 		ModuleModel: 'module-model',
 		todo: 'todo',
-		annual:'annual'
+		annual:'annual',
+		json:'oauth/json2',
+		localstorage:'oauth/localstorage',
+		jso:'oauth/jso',
+		
 	},
 	shim: {
 		"jqueryui": {
+			deps: ['jquery']
+		}, 
+		"jso": {
 			deps: ['jquery']
 		} 
 	}
@@ -28,28 +35,31 @@ var config = {
 	monthes : ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
 	dayNamesMin : ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
 	modules: ['annual', 'periodic', 'event'],
-	toimport: ['jquery','jqueryui', 'underscore', 'mvc', 'ModuleModel', 'todo', 'annual', 'event', 'periodic']
+	toimport: ['jquery','jqueryui', 'underscore', 'mvc', 'ModuleModel', 'todo', 'annual', 'event', 'periodic', 'json', 'localstorage', 'jso']
 };
 
 	
 require(
 	config.toimport,
-	function($, $ui, _, mvc, ModuleModel, todo, annual, event, periodic){
-		for(var i in config.toimport){
-		//	console.log(config.toimport[i], arguments[i], arguments[i] ? (arguments[i].prototype || '') : '');
-		}
-		
+	function($, $ui, _, mvc, ModuleModel, todo, annual, event, periodic, json, localstorage, jso){
+	
 	$(function(){
 	
 		var MainModel = mvc.Model.extend({
-			geturl : 'data.php',
+			id: undefined,
+			//geturl : 'data.php',
 			saveurl : 'save.php',
 			onedaytime : 24*60*60*1000,
-			initialize: function(){
+			initialize: function(a){
 				this.name = 'main';
+				this.id = a;
+				this.geturl = 'data.php?id=' + a;
 			},
 			initModel: function(name){
 				mvc.subscribe(name + 'ModelChanged', this.updateData, this, [name]);
+			},
+			dataFormat: function(){
+				return {"data":this.data, "id": this.id};
 			},
 			dataRecieved: function(){
 				this.todoModel.setData(this.data.todo || []);
@@ -59,7 +69,19 @@ require(
 				var d = new Date(date);
 				//console.log('dataRecieved:: ', date, this.data.today.date, (new Date(date)).getTime());
 				
-				var todayTime = (new Date(date)).getTime()*1;
+				var todayTime = (d).getTime()*1;
+				
+				if (!this.data.today) {
+					this.data.today = {
+						date : date,
+						time: todayTime
+					};
+					this.data.tomorrow = {date : this._dateToStr( new Date(todayTime + this.onedaytime ))}
+					
+					mvc.fire(this.name + 'ModelUpdated');
+					return;
+				}
+				
 				this.data.today.time = this.data.today.time*1;
 				
 				if (this.data.today.time !== todayTime){
@@ -99,19 +121,20 @@ require(
 				_date[1] = parseInt(_date[1], 10);
 				var acts = [];
 				
-				for (var i in this.data.periodic){
-					var it = this.data.periodic[i];
-					if (it.period && (_time-it.start)%it.period === 0) acts.push(it);
-					if (it.unit === 'month' && _date[1]*1 == (new Date(it.start*1)).getDate()) acts.push(it);
-				};
+				if (this.data.periodic) 
+					for (var i in this.data.periodic){
+						var it = this.data.periodic[i];
+						if (it.period && (_time-it.start)%it.period === 0) acts.push(it);
+						if (it.unit === 'month' && _date[1]*1 == (new Date(it.start*1)).getDate()) acts.push(it);
+					};
 				
-				if (this.data.annual[_date[0]] && this.data.annual[_date[0]][_date[1]]) {
+				if (this.data.annual && this.data.annual[_date[0]] && this.data.annual[_date[0]][_date[1]]) {
 					var data = this.data.annual[_date[0]][_date[1]];
 					for (var i in data){
 						acts.push(data[i]);
 					}
 				};
-				if (this.data.event[_date[0]] && this.data.event[_date[0]][_date[1]]) {
+				if (this.data.event && this.data.event[_date[0]] && this.data.event[_date[0]][_date[1]]) {
 					var data = this.data.event[_date[0]][_date[1]];
 					for (var i in data){
 						acts.push(data[i]);
@@ -135,8 +158,8 @@ require(
 			removeTodayItem: function(ind){
 				this.data.today.acts.splice(ind, 1);
 				this.save();
-			},
-					});
+			}
+		});
 		
 		var MainView = mvc.View.extend({
 			initialize: function(){
@@ -262,12 +285,63 @@ require(
 			}
 		});
 		
-		var mainModel = new MainModel();
-		var mainView = new MainView(mainModel);
-		var mainController = new MainController(mainModel, mainView);
 		
-	console.log('mainModel: ', mainModel);
-	console.log('mainController: ', mainController);
+		
+		
+		// Add configuration for one or more providers.
+			jso_configure({
+				"google": {
+					client_id: "386015855865-ou88a31uaabqh8fgr0jmcsblokilbb4j.apps.googleusercontent.com",
+					redirect_uri: "http://localhost/notebook",
+					authorization: "https://accounts.google.com/o/oauth2/auth",
+					isDefault: true
+				}
+			});
+			var token = jso_getToken("google");
+			console.log(token);
+			if (token){
+				getOauthData();
+			} else {
+				$('#page').html(_.template($('#oauth-template').html()));
+				$('#google').on('click', getOauthData);
+			}
+			
+			function getOauthData(){
+				// Perform a data request
+				$.oajax({
+					url: "https://www.googleapis.com/oauth2/v1/userinfo",
+					jso_provider: "google",
+					jso_allowia: true,
+					jso_scopes: ["https://www.googleapis.com/auth/userinfo.profile"],
+					dataType: 'json',
+					success: function(data) {
+						console.log("Response (google):");
+						console.log(data);
+						
+						var mainModel = new MainModel(data.id);
+						var mainView = new MainView(mainModel);
+						var mainController = new MainController(mainModel, mainView);
+						
+						console.log('mainModel: ', mainModel);
+						console.log('mainController: ', mainController);
+						
+					}
+				});
+			}
+			
+/*
+			// Make sure that you have 
+			jso_ensureTokens({
+				"google": ["https://www.googleapis.com/auth/userinfo.profile"]
+			});
+
+			// This dumps all cached tokens to console, for easier debugging.
+			//jso_dump();
+
+			*/
+
+			// jso_wipe();
+	
 	});
 });
 	

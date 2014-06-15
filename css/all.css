@@ -226,7 +226,12 @@ ul {
 #calendar .ui-widget{
 	font-size: 83%;
 }
-
+.enter{
+	font-size:400%;
+	text-align:center;
+	1padding-top: 40%;
+	vertical-align: middle;
+}
 
 
 
