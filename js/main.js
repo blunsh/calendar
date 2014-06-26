@@ -171,13 +171,82 @@ require(
 			templateData: function(){
 				return {list: this.model.data, config: config}
 			},
+			template : function(list, monthes){
+				var str = ' \
+				<div class="today box"> \
+				<div class="title inner">today '+ window.innerWidth +'</div> \
+				<div id="today" class="inner"> \
+					<ul>';
+						console.log(list);
+						_.each(list.today.acts, function(item, ind){ 
+							str += '<li'
+							if (item.date !== list.today.date) { str += ' class="late"' }; 
+							str += '> \
+								<span class="quadr"><a href="#" class="del" data-ind="<%= ind %>">del</a></span>'
+								+ item.name ;
+								if (item.date !== list.today.date) { 
+									str += 
+									'<span class="month">('+ item.date +')</span>';
+								}; 
+							str += '</li>';
+						});
+					str += '</ul> \
+				</div> \
+			</div> \
+			<div class="todo  box"> \
+				<div id="todo" class="inner"></div> \
+			</div> \
+			<div class="calendar box"> \
+				<div id="calendar"></div> \
+				<div class="button-holder">';
+					_.each(config.modules, function(item, ind){
+						str += ' \
+						<div class="button outer"> \
+							<a class="inner show" data-target="'+ item +'"  href="#">'+ item +'</a> \
+						</div>';
+					});
+					
+				str += ' \
+				</div> \
+			</div>	 \
+			<div class="schedule  box"> \
+				<div id="schedule" class="inner"> \
+					<div class="title inner">tomorrow</div> \
+					<ul>';
+						_.each(list.tomorrow.acts, function(item, ind){
+							str += '<li>'+ item.name +'</li>';
+						});
+					str += ' \
+					</ul> \
+				</div> \
+			</div>';
+			
+				return str;
+			},
+			render : function(){
+				var template = this.template(this.model.data, config.monthes);
+				$(this.el).html(template);
+				mvc.fire('mainViewRendered');
+			},
+			
 			calendarHolder : '#calendar',
 			
 			scheduleHolder: '#schedule',
-			scheduletemplate: '#schedule-template',
+			
+			scheduletemplate: function(list, _date){
+				var str = ' \
+				<div class="title inner">'+ _date +'</div> \
+				<ul>';
+					_.each(list, function(item, ind){ 
+						str += '<li>'+ item.name +'</li>';
+					}); 
+				str += '</ul>';
+				
+				return str;
+			},
 			renderSchedule: function MainView_renderSchedule(list, date){
 				console.log(this.name, 'renderSchedule:: ', this.el);
-				$(this.scheduleHolder).html(_.template($(this.scheduletemplate).html(), {list:list, _date: date}));
+				$(this.scheduleHolder).html(this.scheduletemplate(list, date));
 				
 			}
 		});
@@ -289,10 +358,12 @@ require(
 		
 		
 		// Add configuration for one or more providers.
+			var uri = window.document.URL.split('/#')[0];
+			console.log(uri);
 			jso_configure({
 				"google": {
 					client_id: "386015855865-ou88a31uaabqh8fgr0jmcsblokilbb4j.apps.googleusercontent.com",
-					redirect_uri: "http://localhost/notebook",
+					redirect_uri: uri,
 					authorization: "https://accounts.google.com/o/oauth2/auth",
 					isDefault: true
 				}

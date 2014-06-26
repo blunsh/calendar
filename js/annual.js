@@ -1,7 +1,6 @@
 ﻿define('annual',
 	['jquery', 'underscore', 'mvc', 'ModuleModel'],
 	function($, _, mvc, ModuleModel){	
-		//console.log('annual---mvc', ModuleModel, mvc);
 		
 		var AnnualModel = ModuleModel.extend({
 			initialize: function(){
@@ -33,10 +32,36 @@
 				//mvc.subscribe('todoModelUpdated', this.render, this);
 			},
 			el : '#annual',
-			template : $('#annual-template'),
-			templateData: function(){
-				return {list: this.model.data, monthes: config.monthes}
-			}
+			template : function(list, monthes){
+				var str = ' \
+				<input type="text" id="annual-name" placeholder="name" /> \
+				<input type="text" id="annual-date" placeholder="date" /> \
+				<input type="number" id="annual-year" placeholder="year" /> \
+				<a id="add-annual" href="#">add</a> \
+				<ul>';
+					_.each(list, function(month, monthind){
+						str += ' \
+						<li><span class="month">'+ monthes[monthind] +'</span><ul>';
+							_.each(month, function(day, dayind){
+								_.each(day, function(item, ind){
+									str += ' \
+									<li> \
+										'+ dayind + ': ' +item.name +' \
+										<a href="#" class="del" data-ind="'+ monthind + '-' + dayind + '-' + ind +'">del</a> \
+									</li>';
+								 });
+							 });
+						str += '</ul></li>';
+					 }); 
+				str += '</ul>';
+			
+				return str;
+			},
+			render : function(){
+				var template = this.template(this.model.data, config.monthes);
+				$(this.el).html(template);
+				mvc.fire('eventViewRendered');
+			}	
 		});
 		
 		var AnnualController = mvc.Controller.extend({

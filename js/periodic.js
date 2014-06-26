@@ -30,7 +30,33 @@
 		
 		var PeriodicView = mvc.View.extend({
 			el : '#periodic',
-			template : $('#periodic-template')
+			template : function(list){
+				var str = ' \
+				<input type="text" id="periodic-name" /> \
+				<input type="number" id="periodic-number" /> \
+				<select  id="periodic-unit" > \
+					<option value="day">day</option> \
+					<option value="week">week</option> \
+					<option value="month">month</option> \
+				</select> \
+				<input type="text" id="periodic-date" /> \
+				<a id="add-periodic" href="#">add</a> \
+				<ul>';
+					_.each(list, function(item, ind){ 
+						str += ' \
+						<li> \
+							' + item.name + ' each ' + item.number + item.unit + ' \
+							<a href="#" class="del" data-ind="'+ ind +'">del</a> \
+						</li>';
+					 });
+				str += '</ul>';
+				return str;
+			},
+			render : function(){
+				var template = this.template(this.model.data);
+				$(this.el).html(template);
+				mvc.fire('periodicViewRendered');
+			}
 		});
 		
 		var PeriodicController = mvc.Controller.extend({

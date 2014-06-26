@@ -1,225 +1,279 @@
-define(['jquery'],function(){
-	
+(function (window){
+
+	/**
+	* Creates main object that can handle custom events.
+	*/	 
 	var mvc = (function (){
-		var mvc={};
+		var events = {};
+		
 		return {
-			subscribe : function(ename, callback, scope, args){
+		
+			/**
+			* Add a callback for custom event.
+			* @param  {string} ename name of custom event.
+			* @param  {function} callback 
+			* @param  {object} scope 
+			* @param  {object} args 
+			*/	
+			subscribe : function subscribe(ename, callback, scope, args){
 				scope = scope || window;
-				if (!mvc[ename]) mvc[ename] = [];
-				mvc[ename].push({
+				if (!events[ename]) events[ename] = [];
+				events[ename].push({
 					fun: callback,
 					scope: scope,
 					name: ename,
 					args: args
-				})
+				});
 			},
 			
-			unsubscribe : function(ename, callback, scope){
-				if (!mvc[ename]) return;
-				for (var i=0; i < mvc[ename].length; i++){
-					var el = mvc[ename][i];
-					if (el.fun == callback && el.scope == scope) mvc[ename].splice(i, 1)
+			/**
+			* Remove a callback for custom event.
+			* @param  {string} ename name of custom event.
+			* @param  {function} callback 
+			* @param  {object} scope 
+			*/	
+			unsubscribe : function unsubscribe(ename, callback, scope){
+				if (!events[ename]) return;
+				for (var i=0; i < events[ename].length; i++){
+					var el = events[ename][i];
+					if (el.fun == callback && el.scope == scope) events[ename].splice(i, 1)
 				};
 				
 			},
 			
-			fire : function(ename){
-				console.log('fire!!!  ', ename);
-				if (mvc[ename]){
-					for (var i=0; i < mvc[ename].length; i++){
-						var el = mvc[ename][i];
+			/**
+			* Tells that custom event is just happened.
+			* Calls for all callback functions.
+			* @param  {string} ename name of custom event.
+			*/
+			fire : function fire(ename){
+				if (events[ename]){
+					for (var i=0; i < events[ename].length; i++){
+						var el = events[ename][i];
 						el.fun.apply(el.scope, el.args);
 					};
 				}
 			},
-			log : function(){
-				console.log(mvc);
+			
+			/**
+			* Logs all events.
+			*/
+			log : function log(){
+				console.log(events);
 			}
 		}
 	})();
 	
-	
-	/*
-	var mediator   (function(){ 
-    var subscribe   function(channel, fn){ 
-        if (!mediator.channels[channel]) mediator.channels[channel]    []; 
-        mediator.channels[channel].push({ context: this, callback: fn }); 
-        return this; 
-    }, 
-  
-    publish   function(channel){ 
-        if (!mediator.channels[channel]) return false; 
-        var args   Array .prototype .slice .call(arguments, 1); 
-        for (var i   0, l   mediator.channels[channel].length; i < l; i++) { 
-            var subscription   mediator.channels[channel][i]; 
-            subscription.callback.apply(subscription.context, args); 
-        } 
-        return this; 
-    }; 
-  
-    return { 
-        channels: {}, 
-        publish: publish, 
-        subscribe : subscribe, 
-        installTo : function(obj){ 
-            obj .subscribe   subscribe; 
-            obj .publish   publish; 
-        } 
-    }; 
-
-}()); 
-
-И два примера использования реализации, написанной выше: 
-
-//Pub/sub on a centralized mediator 
-
-mediator.name   "tim"; 
-mediator.subscribe('nameChange ', function(arg){ 
-    console .log(this.name); 
-    this.name   arg; 
-	console .log(this.name); 
-}); 
-
-mediator.publish('nameChange ',  'david '); //tim, david 
-
-//Pub/sub via third party mediator 
-
-var obj   { name :  'sam ' }; 
-mediator.installTo(obj); 
-obj .subscribe('nameChange ', function(arg){ 
-    console .log(this.name); 
-    this.name   arg; 
-    console .log(this.name); 
-}); 
-
-obj .publish('nameChange ',  'john'); //sam, john 
-	*/
-	
-	
-	/* - example
-	var MyModel = mvc.model.extend({
-		name: 'MyModel', 
-		gettitle:function Mod_gettitle(){
-			console.log('parentMethod')
-		}
-	});
-	var MyModelObj = new MyModel();
-
-	
-	var MyModelChild = MyModel.extend({
-		name: 'MyModelChild', 
-		gettitle:function M1_gettitle(){
-			this.constructor.superclass.gettitle.call(this);
-			console.log('myMethod');
-		}
-	});
-	var MyModelChildObj = new MyModelChild();
-	
-	MyModelChildObj.gettitle();
-	*/
-	
-	var n = 0;
-	
-	mvc.extend = function extend(t){
-		return function(obj){
+	/**
+	* Emulation of classical inheritance.
+	* Used to extend class.
+	* @param  {string} parentName name of function/class to be extended.
+	*/	
+	mvc.extend = function extend(){
+		/**
+		* Creates child function.
+		*/
+		return function (mixins){
 			var Parent = this;
 		
 			var F = function() { }
 			F.prototype = Parent.prototype;
 			
+			/**
+			* Creating a new function.
+			*/	
 			var Child = function() { 
+				/**
+				* Execution of code inside the parent function.
+				*/
 				Parent.apply(this, arguments);
-				//console.log('extend  ', t);
+				/**
+				* You can add code to be executed inside the new function 
+				* and all its children to the method called "initialize".
+				*/
 				this.initialize.apply(this, arguments);
-				//console.log('extend  ', t, this.name);
 			}
+			
 			Child.prototype = new F();
 			
 			Child.prototype.constructor = Child;
 			Child.superclass = Parent.prototype;
 			Child.superclass.constructor = Parent;
-			Child.extend = mvc.extend(t);
+			Child.extend = mvc.extend();
 			Child.prototype.initialize = function(){};
 			
+			/**
+			* Adding methods to prototype of new function.
+			*/
 			var mixins = Array.prototype.slice.call(arguments, 0);
-			//console.log(t, 'mixins    ', mixins);
+			
 			for (var i = 0; i < mixins.length; ++i)
 			{
 				for (var prop in mixins[i])
 				{
-			//		console.log('mixin    ', prop,  mixins[i][prop]);
 					Child.prototype[prop] = mixins[i][prop];
 				}
 			}
-			//console.log(t, 'Child    ', Child.prototype);
+
 			return Child;
 		}
+	} 
+	
+	/**
+	* Shell for local storages.
+	* Unifies interaction with localStorage and chrome.storage.local.
+	*/
+	var storage = undefined;
+	
+	if (window.localStorage) {
+		storage = {
+			setItem : function(a, b){
+				localStorage.setItem(a, JSON.stringify(b));
+			},
+			removeItem : function(a){
+				localStorage.removeItem(a);
+			},
+			get : function(a, callback){
+				var data = localStorage[a] ? JSON.parse(localStorage[a]) : undefined;
+				//console.log('arg', callback.fun.arguments);
+				callback.fun.apply(callback.scope, [data, callback.arg]);
+			}
+		};
+	}
+	else if (chrome.storage) {
+		storage = {
+			setItem : function(a, b){
+				var data = {};
+				data[a] = b;
+				chrome.storage.local.set(data);
+			},
+			removeItem : function(a){
+				chrome.storage.local.remove(a);
+			},
+			get : function(a,callback){
+				chrome.storage.local.get(a, function(res){
+					callback.fun.apply(callback.scope, [res[a], callback.arg]);
+				});
+			}
+		};
 	}
 	
-	mvc.Model = function Model(arg){
-		//console.log('arg', arg);
+	/**
+	* Variable that counts how many models has been creating on the page.
+	* Used for default names of created models.
+	*/	
+	var n = 0;
+	
+	
+	mvc.Model = function Model(){
 		this.name = 'm'+(n++);
-		
 		return this;
 	};
+	
 	mvc.Model.prototype = {
+	
 		geturl : '',
+		
 		saveurl : '',
+		
 		data : undefined,
-		backup : '',
-		getData : function(){
+		
+		getData : function mvc_Model_getData(){
 			if (!this.geturl) return;
 			var _this = this;
+			
 			$.ajax({
 				url: this.geturl,
 				method: 'GET',
 				cache: false,
 				success: function(resp){
-					_this.data = JSON.parse(resp);
-					_this.backup = resp;		
-					_this.dataRecieved();
+					var recieved = JSON.parse(resp);
+					storage.get(_this.name + 'data', {	
+						fun: function(data, recieved){
+							console.log('callback', this);
+							console.log('callback', arguments);
+							if (!data) {
+								this.data = recieved;
+								storage.setItem(this.name + 'data', this._savingFormat());
+							}
+							else {
+								if (recieved.date >= data.date) {
+									this.data = recieved.data;
+									storage.setItem(this.name + 'data', this._savingFormat());
+								} else {
+									this.data = data.data;
+									this.save();
+								}
+							}
+							this.dataRecieved();
+						},
+						scope: _this,
+						arg: recieved
+					});
+					
+						
+				},
+				failure:  function(resp){
+					storage.get(_this.name + 'data', {	
+						fun: function(data){
+							this.data = local.data;
+							this.dataRecieved();
+						},
+						scope: _this,
+						arg: recieved
+					});
 				}
 			});
 		},
-		dataRecieved: function(){
+		
+		
+		dataRecieved: function mvc_Model_dataRecieved(){
 			mvc.fire(this.name + 'ModelUpdated');
 		},
-		dataFormat: function(){
-			return {"data":this.data};
+		
+		
+		dataFormat: function mvc_Model_dataFormat(){
+			return this.data;
 		},
-		save : function(){
-			//var _this = this;
-			var data = this.dataFormat(); 
+		
+		
+		_savingFormat: function mvc_Model__savingFormat(){
+			return  {
+						'data': this.dataFormat(), 
+						'date': (new Date()).getTime()+''
+					};
+		},
+		
+		
+		save : function mvc_Model_save(){
+			storage.setItem(this.name + 'data', this._savingFormat());
+			mvc.fire(this.name + 'ModelUpdated');
+			
 			$.ajax({
 				url: this.saveurl,
-				data: data,
-				type: 'POST',
-				success: this.onSavingSuccess.bind(this),
-				failure: this.onSavingFailure.bind(this)
+				data: {data:this._savingFormat()},
+				type: 'POST'
 			});
 		},
-		onSavingSuccess: function(resp){
-				mvc.fire(this.name + 'ModelUpdated');
-		},
-		onSavingFailure: function(resp){
-			//console.log(this);
-			_this.data = JSON.parse(_this.backup);
-			mvc.fire('savingerror');
-		},
-		getItems : function(){
+		
+		
+		getItems : function mvc_Model_getItems(){
 			return this.items;
 		},
-		addItem : function(item){
-			this.backup = JSON.stringify(this.data);
+		
+		
+		addItem : function mvc_Model_addItem(item){
 			this.data.push(item);
 			this.save();
 		},
-		removeItem : function(ind){
-			this.backup = JSON.stringify(this.data);
+		
+		
+		removeItem : function mvc_Model_removeItem(ind){
 			this.data.splice(ind, 1);
 			this.save();
 		}
 	};
+	
 	
 	mvc.View = function View (model){
 		this.model = model;
@@ -227,17 +281,27 @@ obj .publish('nameChange ',  'john'); //sam, john
 		//mvc.subscribe('modelUpdated', this.render, this)
 		return this;
 	};
+	
+	
 	mvc.View.prototype = {
+		
+		
 		el: undefined,
+		
+		
 		template: undefined,
-		templateData: function(){
+		
+		
+		templateData: function mvc_View_templateData(){
 			return {list: this.model.data}
 		},
+		
+		
 		render: function mvc_View_render(){
-			console.log(this.name, 'render:: ', this.el);
 			$(this.el).html(_.template(this.template.html(), this.templateData()));
 		}
 	};
+	
 	
 	mvc.Controller = function Controller(model, view){
 		var _this = this;
@@ -253,37 +317,56 @@ obj .publish('nameChange ',  'john'); //sam, john
 		this.model.getData();
 		return this;
 	};
+	
+	
 	mvc.Controller.prototype = {
+	
+	
 		handlers : [],
+		
+		
 		bindedhandlers : [],
+		
+		
 		bindHandlers : function mvc_Controller_bindHandlers(){
 			for (var i=0; i < this.handlers.length; i++){
 				this.bindHandler(this.handlers[i]);
 			};
 		},
+		
+		
 		bindHandler : function mvc_Controller_bindHandler(ev){
-			//console.log(ev, $(ev[0]));
 			var _this = this;
 			$(ev[0]).on(ev[1], '', function(e){(_this[ev[2]]).call(_this, e); e.preventDefault()});
-			this.bindedhandlers.push(ev);
+			this.bindedhandlers.push([ev[0], ev[1], ev[2]]);
 		},
+		
+		
 		unbindHandlers : function mvc_Controller_unbindHandlers(){
 			for (var i=0; i < this.bindedhandlers.length; i++){
 				var ev = this.bindedhandlers[i];
-				//console.log(ev);
 				$(ev[0]).off();
 			};
 			this.bindedhandlers = [];
 		},
-		destroy: function(){
+		
+		
+		destroy: function mvc_Controller_destroy(){
 			this.unbindHandlers();
 			$(this.view.el).empty();
 		}
 	};
 	
-	mvc.Model.extend = mvc.extend('Model');
-	mvc.View.extend = mvc.extend('View');
-	mvc.Controller.extend = mvc.extend('Controller');
+	mvc.Model.extend = mvc.extend();
+	mvc.View.extend = mvc.extend();
+	mvc.Controller.extend = mvc.extend();
 	
-	return  mvc;
-});
+	
+	if (window.require) 
+		window.define(['jquery'], function(){
+			return mvc;
+		})
+	else window.mvc = mvc;
+
+})(window);
+

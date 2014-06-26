@@ -17,10 +17,33 @@
 				//mvc.subscribe('todoModelUpdated', this.render, this);
 			},
 			el : '#todo',
-			template : $('#todo-template'),
-			render1 : function(){
+			//template : $('#todo-template'),
+			template : function(list){
+				var str = '\
+				<div class="title inner">todo</div> \
+				<ul> ';
+					_.each(list, function(item, ind){ 
+						str += ' \
+						<li> \
+							<span class="quadr"> \
+								<a href="#" class="del" data-ind="' + ind + '">del</a> \
+							</span>' +
+							item.act +
+						'</li>';
+					
+					});
+				str += ' \
+				</ul> \
+				<div class="button-holder"> \
+					<input type="text" id="todo-name" /> \
+					<div><a id="add-todo" href="#">add</a></div> \
+				</div>';
+				return str;
+			},
+			render : function(){
 				console.log(this.name, 'render::', this.model.data, this.el);
-				var template = _.template(this.template.html(), {list: this.model.data});
+				//var template = _.template(this.template.html(), {list: this.model.data});
+				var template = this.template(this.model.data);
 				$(this.el).html(template);
 				//mvc.unsubscribe('modelUpdated', this.render, this);
 				mvc.fire('todoViewRendered');

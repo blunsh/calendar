@@ -1,5 +1,5 @@
 ﻿define('event',
-	['jquery', 'underscore','jqueryui', 'mvc', 'ModuleModel'],
+	['jquery','jqueryui', 'underscore', 'mvc', 'ModuleModel'],
 	function($,$ui, _, mvc, ModuleModel){
 	
 		//console.log('event--mvc', ModuleModel,mvc);
@@ -34,9 +34,34 @@
 				//mvc.subscribe('todoModelUpdated', this.render, this);
 			},
 			el : '#event',
-			template : $('#event-template'),
-			templateData: function(){
-				return {list: this.model.data, monthes: config.monthes}
+			template : function(list, monthes){
+				var str = ' \
+				<input type="text" id="event-name" placeholder="name" /> \
+				<input type="text" id="event-date" placeholder="date" /> \
+				<a id="add-event" href="#">add</a> \
+				<ul>';
+					 _.each(list, function(month, monthind){ 
+						str += ' \
+						<li><span class="month">'+ monthes[monthind] +'</span><ul>';
+							 _.each(month, function(day, dayind){ 
+								 _.each(day, function(item, ind){ 
+									str += ' \
+									<li>'
+										+ dayind + ': ' +item.name +'<span class="month">('+ item.date +')</span> \
+										<a href="#" class="del" data-ind="'+ monthind + "-" + dayind + "-" + ind +'">del</a> \
+									</li>';
+								 }); 
+							 }); 
+						str += '</ul></li>';
+					 }); 
+				str += '</ul>';
+				
+				return str;
+			},
+			render : function(){
+				var template = this.template(this.model.data, config.monthes);
+				$(this.el).html(template);
+				mvc.fire('annualViewRendered');
 			}
 		});
 		
