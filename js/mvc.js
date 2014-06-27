@@ -190,11 +190,10 @@
 					var recieved = JSON.parse(resp);
 					storage.get(_this.name + 'data', {	
 						fun: function(data, recieved){
-							console.log('callback', this);
-							console.log('callback', arguments);
 							if (!data) {
-								this.data = recieved;
+								this.data = recieved.data;
 								storage.setItem(this.name + 'data', this._savingFormat());
+								this.save();
 							}
 							else {
 								if (recieved.date >= data.date) {
@@ -234,12 +233,12 @@
 		
 		dataFormat: function mvc_Model_dataFormat(){
 			return this.data;
-		},
+	 	},
 		
 		
 		_savingFormat: function mvc_Model__savingFormat(){
 			return  {
-						'data': this.dataFormat(), 
+						'data': this.data, 
 						'date': (new Date()).getTime()+''
 					};
 		},
@@ -249,9 +248,12 @@
 			storage.setItem(this.name + 'data', this._savingFormat());
 			mvc.fire(this.name + 'ModelUpdated');
 			
+			var dataToSave = this.dataFormat();
+			dataToSave.data = this._savingFormat();
+			
 			$.ajax({
 				url: this.saveurl,
-				data: {data:this._savingFormat()},
+				data: dataToSave,
 				type: 'POST'
 			});
 		},
