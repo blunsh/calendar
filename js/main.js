@@ -35,13 +35,13 @@ var config = {
 	monthes : ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
 	dayNamesMin : ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
 	modules: ['annual', 'periodic', 'event'],
-	toimport: ['jquery','jqueryui', 'underscore', 'mvc', 'ModuleModel', 'todo', 'annual', 'event', 'periodic', 'json', 'localstorage', 'jso']
+	toimport: ['jquery','jqueryui', 'underscore', 'mvc', 'ModuleModel', 'todo', 'annual', 'event', 'periodic', 'jso']
 };
 
 	
 require(
 	config.toimport,
-	function($, $ui, _, mvc, ModuleModel, todo, annual, event, periodic, json, localstorage, jso){
+	function($, $ui, _, mvc, ModuleModel, todo, annual, event, periodic, jso){
 	
 	$(function(){
 	
@@ -62,6 +62,7 @@ require(
 				return {"data":this.data, "id": this.id};
 			},
 			dataRecieved: function(){
+				//console.log('dataRecieved:: this.data= ', this.data);
 				this.todoModel.setData(this.data.todo || []);
 				
 				var n = new Date();
@@ -102,7 +103,7 @@ require(
 			_handleTodayActs: function(){
 				this.data.today.time += this.onedaytime;
 				var date = this._dateToStr(new Date(this.data.today.time));
-				console.log('_handleTodayActs:: ', date, this.data.today.time);
+				//console.log('_handleTodayActs:: ', date, this.data.today.time);
 				this.data.today.date = date;
 				
 				this.data.today.acts = this.data.today.acts || [];
@@ -112,7 +113,7 @@ require(
 					this.data.today.acts.push(acts[i]);
 				};
 				
-				console.log('2_handleTodayActs:: ', date)
+				//console.log('2_handleTodayActs:: ', date)
 			},
 			_getDateActs: function(date, today){
 				var _time = (new Date(date)).getTime();
@@ -146,7 +147,7 @@ require(
 			},
 			updateData: function(name){
 				this.backup = JSON.stringify(this.data);
-				console.log('updateData::  ', name, this);
+			//	console.log('updateData::  ', name, this);
 				this.data[name] = this[name+'Model'].data;
 				this.changed = name;
 				this.save();
@@ -177,8 +178,7 @@ require(
 				<div class="title inner">today '+ window.innerWidth +'</div> \
 				<div id="today" class="inner"> \
 					<ul>';
-						console.log(list);
-						_.each(list.today.acts, function(item, ind){ 
+						if (list) _.each(list.today.acts, function(item, ind){ 
 							str += '<li'
 							if (item.date !== list.today.date) { str += ' class="late"' }; 
 							str += '> \
@@ -199,7 +199,7 @@ require(
 			<div class="calendar box"> \
 				<div id="calendar"></div> \
 				<div class="button-holder">';
-					_.each(config.modules, function(item, ind){
+					 _.each(config.modules, function(item, ind){
 						str += ' \
 						<div class="button outer"> \
 							<a class="inner show" data-target="'+ item +'"  href="#">'+ item +'</a> \
@@ -213,7 +213,7 @@ require(
 				<div id="schedule" class="inner"> \
 					<div class="title inner">tomorrow</div> \
 					<ul>';
-						_.each(list.tomorrow.acts, function(item, ind){
+						if (list) _.each(list.tomorrow.acts, function(item, ind){
 							str += '<li>'+ item.name +'</li>';
 						});
 					str += ' \
@@ -237,7 +237,7 @@ require(
 				var str = ' \
 				<div class="title inner">'+ _date +'</div> \
 				<ul>';
-					_.each(list, function(item, ind){ 
+					if (list) _.each(list, function(item, ind){ 
 						str += '<li>'+ item.name +'</li>';
 					}); 
 				str += '</ul>';
@@ -245,7 +245,7 @@ require(
 				return str;
 			},
 			renderSchedule: function MainView_renderSchedule(list, date){
-				console.log(this.name, 'renderSchedule:: ', this.el);
+				//console.log(this.name, 'renderSchedule:: ', this.el);
 				$(this.scheduleHolder).html(this.scheduletemplate(list, date));
 				
 			}
@@ -271,6 +271,7 @@ require(
 				this.todoView.render();
 				this.todoController.bindHandlers();
 				var _this = this;
+				//console.log('this.model :',this.model);
 				var an = this.model.data.annual || {};
 				var ev = this.model.data.event || [];
 				
@@ -290,7 +291,7 @@ require(
 						return [true, _class, _title];	
 					},
 					onSelect: function(date){
-						console.log('date', date, _this.model.data.tomorrow.date, _this.model.data.tomorrow);
+						//console.log('date', date, _this.model.data.tomorrow.date, _this.model.data.tomorrow);
 						var list = _this.model._getDateActs(date);
 						if (date[0] == 0) date = date.substr(1, date.length-1);
 						_this.view.renderSchedule(list, date == _this.model.data.tomorrow.date ? 'tomorrow' : date);
@@ -359,7 +360,8 @@ require(
 		
 		// Add configuration for one or more providers.
 			var uri = window.document.URL.split('/#')[0];
-			console.log(uri);
+			if (uri.lastIndexOf('/') === uri.length-1) uri = uri.substr(0,uri.length-1 ); 
+			console.log('uri:',uri);
 			jso_configure({
 				"google": {
 					client_id: "386015855865-ou88a31uaabqh8fgr0jmcsblokilbb4j.apps.googleusercontent.com",
@@ -368,26 +370,35 @@ require(
 					isDefault: true
 				}
 			});
-			var token = jso_getToken("google");
-			console.log(token);
-			if (token){
-				getOauthData();
-			} else {
-				$('#page').html(_.template($('#oauth-template').html()));
-				$('#google').on('click', getOauthData);
-			}
+			var token = jso_getToken("google", function(token){
+				
+				console.log('jso_getToken:: ', token);
+				
+				if (token){
+					getOauthData(token);
+				} else {
+					$('#page').html(_.template($('#oauth-template').html()));
+					$('#google').on('click',token, getOauthData);
+				}
+				
+			});
 			
-			function getOauthData(){
+			
+			
+			function getOauthData(data){
 				// Perform a data request
+				if (data.type) var token = data.data;
+				else var token = data;
+				console.log('getOauthData:: ', token);
+				
 				$.oajax({
 					url: "https://www.googleapis.com/oauth2/v1/userinfo",
 					jso_provider: "google",
 					jso_allowia: true,
 					jso_scopes: ["https://www.googleapis.com/auth/userinfo.profile"],
 					dataType: 'json',
+					token: token,
 					success: function(data) {
-						console.log("Response (google):");
-						console.log(data);
 						
 						var mainModel = new MainModel(data.id);
 						var mainView = new MainView(mainModel);
@@ -398,20 +409,12 @@ require(
 						
 					}
 				});
+				
 			}
-			
-/*
-			// Make sure that you have 
-			jso_ensureTokens({
-				"google": ["https://www.googleapis.com/auth/userinfo.profile"]
-			});
-
-			// This dumps all cached tokens to console, for easier debugging.
-			//jso_dump();
-
-			*/
-
-			// jso_wipe();
+			/*for (var i in localStorage){
+				console.log(i);
+				if (i.indexOf('state-')!= -1) delete localStorage[i];
+			}*/
 	
 	});
 });

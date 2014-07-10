@@ -7,7 +7,7 @@
 		
 		fclose($myFile);
 	} else {
-		$data = '{"todo":[], "periodic":[], "event":[], "annual":{}}';
+		$data = '{"date":"'.round(microtime(true) * 1000).'","data":{"todo":[], "periodic":[], "event":[], "annual":{}}}';
 	}
 	echo $data;
 ?>

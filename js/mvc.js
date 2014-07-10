@@ -120,39 +120,45 @@
 	} 
 	
 	/**
-	* Shell for local storages.
+	* Shell for storages.
 	* Unifies interaction with localStorage and chrome.storage.local.
 	*/
-	var storage = undefined;
+	storage = undefined;
 	
 	if (window.localStorage) {
 		storage = {
-			setItem : function(a, b){
+			set : function storage_set(a, b){
 				localStorage.setItem(a, JSON.stringify(b));
 			},
-			removeItem : function(a){
+			remove : function storage_remove(a){
 				localStorage.removeItem(a);
 			},
-			get : function(a, callback){
+			get : function storage_get(a, callback){
 				var data = localStorage[a] ? JSON.parse(localStorage[a]) : undefined;
-				//console.log('arg', callback.fun.arguments);
-				callback.fun.apply(callback.scope, [data, callback.arg]);
+				var arg = callback.arg || [];
+				arg.unshift(data);
+				if (callback.fun) callback.fun.apply(callback.scope || window, arg);
 			}
 		};
 	}
 	else if (chrome.storage) {
 		storage = {
-			setItem : function(a, b){
+			set : function storage_set(a, b){
+				//console.log('storage.set::', a, b);
 				var data = {};
 				data[a] = b;
 				chrome.storage.local.set(data);
 			},
-			removeItem : function(a){
+			remove : function storage_remove(a){
+				//console.log('storage.remove::   a=', a);
 				chrome.storage.local.remove(a);
 			},
-			get : function(a,callback){
+			get : function storage_(geta, callback){
 				chrome.storage.local.get(a, function(res){
-					callback.fun.apply(callback.scope, [res[a], callback.arg]);
+					//console.log('storage.get:: data-callback:', res[a], callback);
+					var arg = callback.arg || [];
+					arg.unshift(res[a]);
+					if (callback.fun) callback.fun.apply(callback.scope || window, arg);
 				});
 			}
 		};
@@ -190,15 +196,16 @@
 					var recieved = JSON.parse(resp);
 					storage.get(_this.name + 'data', {	
 						fun: function(data, recieved){
+							console.log('storage.get:: data, recieved', data, recieved);
 							if (!data) {
 								this.data = recieved.data;
-								storage.setItem(this.name + 'data', this._savingFormat());
+								storage.set(this.name + 'data', this._savingFormat());
 								this.save();
 							}
 							else {
 								if (recieved.date >= data.date) {
 									this.data = recieved.data;
-									storage.setItem(this.name + 'data', this._savingFormat());
+									storage.set(this.name + 'data', this._savingFormat());
 								} else {
 									this.data = data.data;
 									this.save();
@@ -207,7 +214,7 @@
 							this.dataRecieved();
 						},
 						scope: _this,
-						arg: recieved
+						arg: [recieved]
 					});
 					
 						
@@ -219,7 +226,7 @@
 							this.dataRecieved();
 						},
 						scope: _this,
-						arg: recieved
+						arg: [recieved]
 					});
 				}
 			});
@@ -245,7 +252,7 @@
 		
 		
 		save : function mvc_Model_save(){
-			storage.setItem(this.name + 'data', this._savingFormat());
+			storage.set(this.name + 'data', this._savingFormat());
 			mvc.fire(this.name + 'ModelUpdated');
 			
 			var dataToSave = this.dataFormat();
