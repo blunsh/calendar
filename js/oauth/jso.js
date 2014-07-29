@@ -1,4 +1,8 @@
-(function(exp, $) {
+define('jso',
+	['jquery'],
+	function($){
+	
+
 	var 
 		config = {},
 		default_lifetime = 3600,
@@ -9,6 +13,8 @@
 		api_redirect,
 		Api_default_storage,
 		api_storage,
+		
+		exp = {},
 
 		internalStates = [];
 
@@ -110,6 +116,7 @@
 	 */
 	api_redirect = function(url) {
 		window.location = url;
+		//window.open(url);
 	};
 
 	Api_default_storage = function() {
@@ -242,10 +249,10 @@
 			function getToken(tokens){
 				//console.log('getToken_  tokens:', tokens);
 				tokens = api_storage.filterTokens(tokens, scopes);
-				if (tokens.length < 1) token = null;
+				if (tokens.length < 1) token = {};
 				else token = tokens[0];
-				//console.log('getToken::', token);
-				callback(token);
+				console.log('getToken:: callback=', callback, token);
+				if (typeof callback === 'function') callback(token);
 			}
 		);
 		
@@ -272,21 +279,18 @@
 	 * childbrowser when the jso context is not receiving the response,
 	 * instead the response is received on a child browser.
 	 */
-	exp.jso_checkfortoken = function(providerID, url, callback) {
+	exp.checkfortoken = function(providerID, url, callback) {
 		var 
 			atoken,
-			h = window.location.hash,
-			now = epoch(),
-			state,
-			co;
-console.log('jso_checkfortoken::  providerID= ', providerID);
+			h = window.location.hash;
+console.log('checkfortoken::  providerID= ', providerID);
 
-		log("jso_checkfortoken(" + providerID + ")");
+		log("checkfortoken (" + providerID + ")");
 
 		// If a url is provided 
 		if (url) {
 			// log('Hah, I got the url and it ' + url);
-			if(url.indexOf('#') === -1) return;
+			if (url.indexOf('#') === -1) return;
 			h = url.substring(url.indexOf('#'));
 			// log('Hah, I got the hash and it is ' +  h);
 		}
@@ -298,8 +302,18 @@ console.log('jso_checkfortoken::  providerID= ', providerID);
 		h = h.substring(1);
 		atoken = parseQueryString(h);
 		
-console.log('jso_checkfortoken::   atoken', atoken.state);
+		exp.handleToken(providerID, atoken, callback);
+	}
 
+
+	exp.handleToken = function(providerID, atoken, callback){	
+		
+		console.log('checkfortoken::   atoken', atoken.state);
+		var 
+			now = epoch(),
+			state, 
+			co;
+			
 		if (atoken.state) {
 			//state = api_storage.getState(atoken.state);
 			storage.get("state-" + atoken.state, {
@@ -314,7 +328,7 @@ console.log('jso_checkfortoken::   atoken', atoken.state);
 		} else {
 			if (!providerID) {throw "Could not get [state] and no default providerid is provided.";}
 			state = {providerID: providerID};
-				console.log('inline::');
+			console.log('inline::');
 			go(state);
 		}
 
@@ -388,7 +402,7 @@ console.log('jso_checkfortoken::   atoken', atoken.state);
 
 
 			if (typeof callback === 'function') {
-				callback();
+				callback(atoken);
 			}
 
 			// log(atoken);
@@ -398,7 +412,7 @@ console.log('jso_checkfortoken::   atoken', atoken.state);
 	/*
 	 * A config object contains:
 	 */
-	var jso_authrequest = function(providerid, scopes, callback) {
+	var authrequest = function(providerid, scopes, callback) {
 
 		var 
 			state,
@@ -456,7 +470,7 @@ console.log('jso_checkfortoken::   atoken', atoken.state);
 
 	};
 
-	exp.jso_ensureTokens = function (ensure) {
+	exp.ensureTokens = function (ensure) {
 		var providerid, scopes, token;
 		for(providerid in ensure) {
 			scopes = undefined;
@@ -468,7 +482,7 @@ console.log('jso_checkfortoken::   atoken', atoken.state);
 					log(token);
 
 					if (token === null) {
-						jso_authrequest(providerid, scopes);
+						authrequest(providerid, scopes);
 					}
 				},
 				scopes
@@ -481,7 +495,7 @@ console.log('jso_checkfortoken::   atoken', atoken.state);
 		return true;
 	}
 
-	exp.jso_findDefaultEntry = function(c) {
+	exp.findDefaultEntry = function(c) {
 		var 
 			k,
 			i = 0;
@@ -497,14 +511,14 @@ console.log('jso_checkfortoken::   atoken', atoken.state);
 		if (i === 1) return k;
 	};
 
-	exp.jso_configure = function(c, opts) {
+	exp.configure = function(c, opts) {
 		config = c;
 		setOptions(opts);
 		try {
 
-			var def = exp.jso_findDefaultEntry(c);
-			log("jso_configure() about to check for token for this entry", def);
-			exp.jso_checkfortoken(def);	
+			var def = exp.findDefaultEntry(c);
+			log("configure() about to check for token for this entry", def);
+			exp.checkfortoken(def);	
 
 		} catch(e) {
 			log("Error when retrieving token from hash: " + e);
@@ -513,7 +527,7 @@ console.log('jso_checkfortoken::   atoken', atoken.state);
 		
 	}
 
-	exp.jso_dump = function() {
+	exp.dump = function() {
 		var key;
 		for(key in config) {
 
@@ -526,16 +540,16 @@ console.log('jso_checkfortoken::   atoken', atoken.state);
 		}
 	}
 
-	exp.jso_wipe = function() {
+	exp.wipe = function() {
 		var key;
-		log("jso_wipe()");
+		log("wipe()");
 		for(key in config) {
 			log("Wipping tokens for " + key);
 			api_storage.wipeTokens(key);
 		}
 	}
 
-	exp.jso_getToken = function(providerid, callback, scopes) {
+	exp.getToken = function(providerid, callback, scopes) {
 		var token = api_storage.getToken(
 			providerid, 
 			function (token) {
@@ -553,11 +567,11 @@ console.log('jso_checkfortoken::   atoken', atoken.state);
 
 
 
-	exp.jso_registerRedirectHandler = function(callback) {
+	exp.registerRedirectHandler = function(callback) {
 		api_redirect = callback;
 	};
 
-	exp.jso_registerStorageHandler = function(object) {
+	exp.registerStorageHandler = function(object) {
 		api_storage = object;
 	};
 
@@ -576,9 +590,9 @@ console.log('jso_checkfortoken::   atoken', atoken.state);
 			providerid,
 			co;
 		
-		providerid = settings.jso_provider;
-		allowia = settings.jso_allowia || false;
-		scopes = settings.jso_scopes;
+		providerid = settings.provider;
+		allowia = settings.allowia || false;
+		scopes = settings.scopes;
 		//token = api_storage.getToken(providerid, scopes);
 		token = settings.token;
 		co = config[providerid];
@@ -632,8 +646,8 @@ console.log('token:  ', token);
 			if (allowia) { 
 				console.log("Perform authrequest");
 				
-				jso_authrequest(providerid, scopes, function() {
-					api_storage.getToken(providerid, scopes, performAjax);
+				authrequest(providerid, scopes, function() {
+					api_storage.getToken(providerid, '', scopes, performAjax);
 					
 				});
 				return;
@@ -647,4 +661,7 @@ console.log('token:  ', token);
 	};
 
 
-})(window, window.jQuery);
+
+		
+		return exp;
+});

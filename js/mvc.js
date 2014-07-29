@@ -134,7 +134,10 @@
 				localStorage.removeItem(a);
 			},
 			get : function storage_get(a, callback){
-				var data = localStorage[a] ? JSON.parse(localStorage[a]) : undefined;
+				console.log('localStorage.get:: ', a, localStorage[a], localStorage[a] == undefined ,'==');
+				
+				var data = (localStorage[a] != undefined) ? JSON.parse(localStorage[a]) : undefined;
+				console.log('localStorage.get:: ', data);
 				var arg = callback.arg || [];
 				arg.unshift(data);
 				if (callback.fun) callback.fun.apply(callback.scope || window, arg);
@@ -153,7 +156,7 @@
 				//console.log('storage.remove::   a=', a);
 				chrome.storage.local.remove(a);
 			},
-			get : function storage_(geta, callback){
+			get : function storage_get(a, callback){
 				chrome.storage.local.get(a, function(res){
 					//console.log('storage.get:: data-callback:', res[a], callback);
 					var arg = callback.arg || [];

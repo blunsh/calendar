@@ -16,10 +16,8 @@
 		ModuleModel: 'module-model',
 		todo: 'todo',
 		annual:'annual',
-		json:'oauth/json2',
-		localstorage:'oauth/localstorage',
-		jso:'oauth/jso',
-		
+		login:'oauth/login',
+		jso:'oauth/jso'
 	},
 	shim: {
 		"jqueryui": {
@@ -35,16 +33,17 @@ var config = {
 	monthes : ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
 	dayNamesMin : ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
 	modules: ['annual', 'periodic', 'event'],
-	toimport: ['jquery','jqueryui', 'underscore', 'mvc', 'ModuleModel', 'todo', 'annual', 'event', 'periodic', 'jso']
+	toimport: ['jquery','jqueryui', 'underscore', 'mvc', 'ModuleModel', 'todo', 'annual', 'event', 'periodic', 'login']
 };
 
 	
 require(
 	config.toimport,
-	function($, $ui, _, mvc, ModuleModel, todo, annual, event, periodic, jso){
+	function($, $ui, _, mvc, ModuleModel, todo, annual, event, periodic, login){
 	
 	$(function(){
-	
+		console.log('login:', login);
+		
 		var MainModel = mvc.Model.extend({
 			id: undefined,
 			//geturl : 'data.php',
@@ -251,7 +250,6 @@ require(
 			}
 		});
 		
-		
 		var MainController = mvc.Controller.extend({
 			handlers : [
 				['a.show','click','periodPanelOpen'],
@@ -357,64 +355,19 @@ require(
 		
 		
 		
-		
-		// Add configuration for one or more providers.
-			var uri = window.document.URL.split('/#')[0];
-			if (uri.lastIndexOf('/') === uri.length-1) uri = uri.substr(0,uri.length-1 ); 
-			console.log('uri:',uri);
-			jso_configure({
-				"google": {
-					client_id: "386015855865-ou88a31uaabqh8fgr0jmcsblokilbb4j.apps.googleusercontent.com",
-					redirect_uri: uri,
-					authorization: "https://accounts.google.com/o/oauth2/auth",
-					isDefault: true
-				}
-			});
-			var token = jso_getToken("google", function(token){
-				
-				console.log('jso_getToken:: ', token);
-				
-				if (token){
-					getOauthData(token);
-				} else {
-					$('#page').html(_.template($('#oauth-template').html()));
-					$('#google').on('click',token, getOauthData);
-				}
-				
-			});
+		//login.setUri(window.document.URL.split('/#')[0]);
+		login.setRedirectUri(window.document.URL.split('/#')[0]);
+		//login.setRedirectUri('http://localhost/notebook/login.php');
+		//login.setRemoteUri('http://localhost/notebook/login.txt');
+		login.ready(function(data){
+			var mainModel = new MainModel(data.id);
+			var mainView = new MainView(mainModel);
+			var mainController = new MainController(mainModel, mainView);
 			
-			
-			
-			function getOauthData(data){
-				// Perform a data request
-				if (data.type) var token = data.data;
-				else var token = data;
-				console.log('getOauthData:: ', token);
-				
-				$.oajax({
-					url: "https://www.googleapis.com/oauth2/v1/userinfo",
-					jso_provider: "google",
-					jso_allowia: true,
-					jso_scopes: ["https://www.googleapis.com/auth/userinfo.profile"],
-					dataType: 'json',
-					token: token,
-					success: function(data) {
-						
-						var mainModel = new MainModel(data.id);
-						var mainView = new MainView(mainModel);
-						var mainController = new MainController(mainModel, mainView);
-						
-						console.log('mainModel: ', mainModel);
-						console.log('mainController: ', mainController);
-						
-					}
-				});
-				
-			}
-			/*for (var i in localStorage){
-				console.log(i);
-				if (i.indexOf('state-')!= -1) delete localStorage[i];
-			}*/
+			console.log('mainModel: ', mainModel);
+			console.log('mainController: ', mainController);
+		});
+		login.start();
 	
 	});
 });
