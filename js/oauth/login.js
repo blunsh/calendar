@@ -82,7 +82,7 @@
 			
 			jso.configure({
 				"google": {
-					client_id: "386015855865-ou88a31uaabqh8fgr0jmcsblokilbb4j.apps.googleusercontent.com",
+					client_id: "???",
 					redirect_uri: uri,
 					authorization: "https://accounts.google.com/o/oauth2/auth",
 					isDefault: true
